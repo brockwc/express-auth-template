@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const layouts = require('express-ejs-layouts');
 const session = require('express-session');
+const passport = require('./config/ppConfig');
 
 const app = express();
 
@@ -19,6 +20,10 @@ app.use(session({
   resave: false,
   saveUninitialized: true 
 }))
+
+// the following two lines must appear after configuring the session
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.get('/', (req, res) => {
   res.render('index');
