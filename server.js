@@ -2,7 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const layouts = require('express-ejs-layouts');
 const session = require('express-session');
+const flash = require("connect-flash")
 const passport = require('./config/ppConfig');
+const isLoggedIn = require('./middleware/isLoggedIn')
 
 const app = express();
 
@@ -25,11 +27,26 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
+// FLASH
+app.use(flash())
+// adds a method to the req object for universal access
+
+// Set up local variables (data that's accessible from anywhere in the app)
+app.use((req, res, next) => {
+  // before every route is loaded, attach flash messages and the 
+  // current user to res.locals
+  res.locals.alerts = req.flash()
+  res.locals.currentUser = req.user
+
+  next()
+})
+
+
 app.get('/', (req, res) => {
   res.render('index');
 });
 
-app.get('/profile', (req, res) => {
+app.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
 

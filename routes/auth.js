@@ -16,26 +16,20 @@ router.post('/signup', (req, res) => {
       password: req.body.password
     }
   }).then(([user, created]) => {
-    
-    // At this point in the request, is the user's password hashed?
-    console.log('----------------')
-    console.log(user)
-    console.log('----------------')
-
     if (created) {
       // success
-      console.log(`${user.name} was created!`)
       passport.authenticate('local', {
         successRedirect: '/',
+        successFlash: 'Account created and user logged in!'
       })(req, res)
     } else {
       // user already exists, so we redirect
-      console.log('Email already exists')
+      req.flash('error', 'Email already exists')
       res.redirect('/auth/signup')
     }
   }).catch(error => {
     // if an error occurs, console log the error message
-    console.log(`An error occurred: ${ error.message }`)
+    req.flash('error', error.message)
     res.redirect('/auth/signup')
   })
 })
@@ -46,11 +40,14 @@ router.get('/login', (req, res) => {
 
 router.post('/login', passport.authenticate('local', {
   successRedirect: '/',
-  failureRedirect: '/auth/login'
+  failureRedirect: '/auth/login',
+  successFlash: 'You have logged in!',
+  failureFlash: 'Invalid username and/or password.'
 }))
 
 router.get('/logout', (req, res) => {
   req.logout()
+  req.flash('success', 'You have logged out!')
   res.redirect('/')
 })
 
